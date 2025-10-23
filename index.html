@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telecom KPI Dashboard</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom style for active tab */
+        .tab-active {
+            border-bottom: 2px solid #3B82F6; /* blue-600 */
+            color: #3B82F6;
+        }
+        .tab-inactive {
+            color: #4B5563; /* gray-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8">
+
+        <!-- Header -->
+        <header class="mb-6 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-800">Network Performance Dashboard</h1>
+        </header>
+
+        <!-- Data Sources Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Data Sources</h2>
+            <p class="text-gray-600 mb-4">This dashboard is based on the following uploaded files:</p>
+            <ul class="list-disc list-inside text-sm text-gray-500 space-y-1 mb-4">
+                <li>,mbbnm,m.xlsx - 2G Area 1.csv</li>
+                <li>,mbbnm,m.xlsx - 3G Area 1.csv</li>
+                <li>,mbbnm,m.xlsx - 4G Area 2.csv</li>
+                <li>,mbbnm,m.xlsx - 3G Area 2 (Carriers).csv</li>
+                <li>,mbbnm,m.xlsx - 3G Area 2 (Cluster).csv</li>
+                <li>,mbbnm,m.xlsx - 4G Area 3.csv</li>
+                <li>,mbbnm,m.xlsx - 3G Area 3.csv</li>
+                <li>,mbbnm,m.xlsx - 2G Area 4.csv</li>
+                <li>,mbbnm,m.xlsx - 3G Area 4.csv</li>
+            </ul>
+            <button class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                Upload New File
+            </button>
+        </div>
+
+        <!-- Global KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <!-- Card 1: Total Speech Traffic -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                <div class="p-3 bg-blue-100 rounded-full">
+                    <i data-lucide="phone" class="text-blue-600"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Total Speech Traffic</span>
+                    <p class="text-2xl font-bold text-gray-800">451.2k <span class="text-base font-normal">Erlang</span></p>
+                </div>
+            </div>
+            <!-- Card 2: Total Data Traffic -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                <div class="p-3 bg-green-100 rounded-full">
+                    <i data-lucide="bar-chart-2" class="text-green-600"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Total Data Traffic</span>
+                    <p class="text-2xl font-bold text-gray-800">8,204.5 <span class="text-base font-normal">TB</span></p>
+                </div>
+            </div>
+            <!-- Card 3: Avg DCR -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                <div class="p-3 bg-red-100 rounded-full">
+                    <i data-lucide="phone-off" class="text-red-600"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Avg. Drop Call Rate (DCR)</span>
+                    <p class="text-2xl font-bold text-gray-800">0.42%</p>
+                </div>
+            </div>
+            <!-- Card 4: Avg 4G Throughput -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                <div class="p-3 bg-purple-100 rounded-full">
+                    <i data-lucide="download" class="text-purple-600"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Avg. 4G DL Throughput</span>
+                    <p class="text-2xl font-bold text-gray-800">21.8 <span class="text-base font-normal">Mbps</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabbed Interface -->
+        <div class="bg-white rounded-lg shadow-md">
+            <!-- Tab Headers -->
+            <div class="flex border-b border-gray-200">
+                <button id="area1-tab" onclick="showTab('area1')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 1</button>
+                <button id="area2-tab" onclick="showTab('area2')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 2</button>
+                <button id="area3-tab" onclick="showTab('area3')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 3</button>
+                <button id="area4-tab" onclick="showTab('area4')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 4</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6">
+                <!-- Area 1 Content -->
+                <div id="area1-content" class="tab-pane">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 1 Analysis (2G & 3G)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">Speech Traffic (2G vs 3G)</h4>
+                            <div class="h-80">
+                                <canvas id="area1-speech-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">3G Data Traffic & KPIs</h4>
+                            <div class="h-80">
+                                <canvas id="area1-3g-kpi-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Area 2 Content -->
+                <div id="area2-content" class="tab-pane hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 2 Analysis (3G & 4G)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Data Traffic by Band</h4>
+                            <div class="h-80">
+                                <canvas id="area2-4g-traffic-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Avg. DL User Throughput</h4>
+                            <div class="h-80">
+                                <canvas id="area2-4g-throughput-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Area 3 Content -->
+                <div id="area3-content" class="tab-pane hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 3 Analysis (3G & 4G)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Throughput (CA vs Non-CA)</h4>
+                            <div class="h-80">
+                                <canvas id="area3-4g-ca-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">3G KPIs (CFR & DCLR)</h4>
+                            <div class="h-80">
+                                <canvas id="area3-3g-kpi-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Area 4 Content -->
+                <div id="area4-content" class="tab-pane hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 4 Analysis (2G & 3G)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">2G KPIs (CFR, DCLR, AFR)</h4>
+                            <div class="h-80">
+                                <canvas id="area4-2g-kpi-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-600">3G HSDPA User Throughput</h4>
+                            <div class="h-80">
+                                <canvas id="area4-3g-throughput-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Mock data labels
+        const mockLabels = ['09-20', '09-21', '09-22', '09-23', '09-24', '09-25', '09-26'];
+
+        // --- Chart Configuration ---
+
+        function createArea1Charts() {
+            // Area 1 - Speech Chart
+            const ctx1 = document.getElementById('area1-speech-chart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: mockLabels,
+                    datasets: [
+                        {
+                            label: '2G Speech Traffic',
+                            data: [17106, 17282, 17489, 17186, 16593, 13534, 15835],
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: '3G Speech Traffic',
+                            data: [29188, 29278, 29326, 29469, 28000, 27500, 29100],
+                            borderColor: 'rgb(34, 197, 94)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Area 1 - 3G KPI Chart
+            const ctx2 = document.getElementById('area1-3g-kpi-chart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: mockLabels,
+                    datasets: [
+                        {
+                            label: '3G Data Traffic (GB)',
+                            data: [704, 695, 691, 680, 670, 650, 700],
+                            backgroundColor: 'rgb(167, 139, 250)',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '3G DCLR (%)',
+                            data: [0.14, 0.14, 0.14, 0.15, 0.13, 0.14, 0.15],
+                            borderColor: 'rgb(239, 68, 68)',
+                            type: 'line',
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Data Traffic (GB)' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'DCLR (%)' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        }
+
+        function createArea2Charts() {
+            // Area 2 - 4G Traffic
+            const ctx1 = document.getElementById('area2-4g-traffic-chart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: mockLabels,
+                    datasets: [
+                        {
+                            label: '4G L09 Data Traffic (GB)',
+                            data: [859, 906, 929, 1043, 980, 890, 910],
+                            borderColor: 'rgb(59, 130, 246)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '4G L18 Data Traffic (GB)',
+                            data: [945, 977, 1006, 1064, 1010, 950, 980],
+                            borderColor: 'rgb(34, 197, 94)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '4G L21 Data Traffic (GB)',
+                            data: [10239, 10134, 10436, 10300, 10200, 10100, 10350],
+                            borderColor: 'rgb(249, 115, 22)',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Area 2 - 4G Throughput
+            const ctx2 = document.getElementById('area2-4g-throughput-chart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['L09', 'L18', 'L21'],
+                    datasets: [
+                        {
+                            label: 'Avg. DL Throughput (Mbps)',
+                            data: [7.06, 10.36, 20.1],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.7)',
+                                'rgba(34, 197, 94, 0.7)',
+                                'rgba(249, 115, 22, 0.7)',
+                            ],
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+        
+        function createArea3Charts() {
+            // Area 3 - 4G CA/Non-CA
+            const ctx1 = document.getElementById('area3-4g-ca-chart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: mockLabels,
+                    datasets: [
+                        {
+                            label: 'Non-CA DL Thr (Mbps)',
+                            data: [7.28, 6.89, 6.99, 7.26, 7.97, 8.16, 7.90],
+                            borderColor: 'rgb(234, 179, 8)',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'CA DL Thr (Mbps)',
+                            data: [20.45, 19.42, 19.78, 20.62, 22.18, 22.23, 21.5],
+                            borderColor: 'rgb(192, 38, 211)',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Avg DL Thr (Mbps)',
+                            data: [9.15, 8.52, 8.56, 8.91, 10.01, 10.54, 10.1],
+                            borderColor: 'rgb(34, 197, 94)',
+                            borderWidth: 3,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Area 3 - 3G KPIs
+            const ctx2 = document.getElementById('area3-3g-kpi-chart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: mockLabels,
+                    datasets: [
+                        {
+                            label: 'CFR (%)',
+                            data: [0.41, 0.40, 0.39, 0.38, 0.42, 0.39, 0.40],
+                            borderColor: 'rgb(239, 68, 68)',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'DCLR (%)',
+                            data: [0.31, 0.39, 0.35, 0.33, 0.36, 0.32, 0.34],
+                            borderColor: 'rgb(249, 115, 22)',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'Rate (%)' } } } }
+            });
+        }
+        
+        function createArea4Charts() {
+            // Area 4 - 2G KPIs
+            const ctx1 = document.getElementById('area4-2g-kpi-chart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: mockLabels,
+                    datasets: [
+                        {
+                            label: 'CFR (%)',
+                            data: [0.01, 0.02, 0.03, 0.01, 0.02, 0.03, 0.01],
+                            borderColor: 'rgb(239, 68, 68)',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'DCLR (%)',
+                            data: [1.05, 1.08, 1.05, 1.10, 1.07, 1.06, 1.08],
+                            borderColor: 'rgb(249, 115, 22)',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'AFR (%)',
+                            data: [0.44, 0.48, 0.38, 0.40, 0.43, 0.41, 0.45],
+                            borderColor: 'rgb(59, 130, 246)',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'Rate (%)' } } } }
+            });
+
+            // Area 4 - 3G Throughput
+            const ctx2 = document.getElementById('area4-3g-throughput-chart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: mockLabels,
+                    datasets: [
+                        {
+                            label: 'HSDPA User Thr (Kbps)',
+                            data: [654, 648, 649, 648, 652, 655, 651],
+                            borderColor: 'rgb(34, 197, 94)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'Kbps' } } } }
+            });
+        }
+
+        // --- Tab Switching Logic ---
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        const tabButtons = document.querySelectorAll('.tab-inactive');
+
+        function showTab(tabId) {
+            // Hide all panes
+            tabPanes.forEach(pane => {
+                pane.classList.add('hidden');
+            });
+
+            // Deactivate all buttons
+            tabButtons.forEach(button => {
+                button.classList.remove('tab-active');
+                button.classList.add('tab-inactive');
+            });
+
+            // Show selected pane
+            document.getElementById(tabId + '-content').classList.remove('hidden');
+
+            // Activate selected button
+            const activeButton = document.getElementById(tabId + '-tab');
+            activeButton.classList.add('tab-active');
+            activeButton.classList.remove('tab-inactive');
+        }
+
+        // --- Initialization ---
+        window.onload = () => {
+            // Initialize charts
+            createArea1Charts();
+            createArea2Charts();
+            createArea3Charts();
+            createArea4Charts();
+
+            // Show the first tab by default
+            showTab('area1');
+            
+            // Initialize Lucide icons
+            lucide.createIcons();
+        };
+
+    </script>
+</body>
+</html>
