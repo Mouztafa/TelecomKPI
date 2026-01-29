@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Telecom KPI Dashboard</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Load Lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         /* Custom style for active tab */
         .tab-active {
@@ -19,156 +20,186 @@
         .tab-inactive {
             color: #4B5563; /* gray-600 */
         }
+
+        /* Force the page to fit one viewport by scaling when needed */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* prevent outer scrolling; page element will be scaled to fit */
+            background: #f3f4f6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Page wrapper that will be scaled down when needed */
+        #page {
+            transform-origin: top left;
+            transition: transform 160ms ease;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            /* allow content to determine height; scaling will shrink to fit viewport */
+        }
+
+        /* Ensure chart panels have fixed visual height that Chart.js fills */
+        .chart-panel {
+            height: 14.5rem; /* default height; will scale with the page */
+        }
+
+        /* Larger screens: slightly bigger chart panels */
+        @media (min-width: 1024px) {
+            .chart-panel {
+                height: 20rem;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
+<body>
 
-    <!-- Main Container -->
-        <div class="container mx-auto p-4 md:p-8">
+    <div id="page" class="p-4 md:p-8">
+        <div class="container mx-auto">
 
-        <!-- Header -->
-        <!-- <header class="mb-6 flex justify-between items-center"> -->
-            <h1 class="text-3xl font-bold text-gray-800">Network Performance Dashboard</h1>
-        </header>
+            <!-- Header -->
+            <header class="mb-6 flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-gray-800">Network Performance Dashboard</h1>
+            </header>
 
-        <!-- Data Sources Section -->
-       
+            <!-- Global KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Card 1: Total Speech Traffic -->
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                    <div class="p-3 bg-blue-100 rounded-full">
+                        <i data-lucide="phone" class="text-blue-600"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Total Speech Traffic</span>
+                        <p class="text-2xl font-bold text-gray-800">451.2k <span class="text-base font-normal">Erlang</span></p>
+                    </div>
+                </div>
+                <!-- Card 2: Total Data Traffic -->
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                    <div class="p-3 bg-green-100 rounded-full">
+                        <i data-lucide="bar-chart-2" class="text-green-600"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Total Data Traffic</span>
+                        <p class="text-2xl font-bold text-gray-800">8,204.5 <span class="text-base font-normal">TB</span></p>
+                    </div>
+                </div>
+                <!-- Card 3: Avg DCR -->
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                    <div class="p-3 bg-red-100 rounded-full">
+                        <i data-lucide="phone-off" class="text-red-600"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Avg. Drop Call Rate (DCR)</span>
+                        <p class="text-2xl font-bold text-gray-800">0.42%</p>
+                    </div>
+                </div>
+                <!-- Card 4: Avg 4G Throughput -->
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
+                    <div class="p-3 bg-purple-100 rounded-full">
+                        <i data-lucide="download" class="text-purple-600"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Avg. 4G DL Throughput</span>
+                        <p class="text-2xl font-bold text-gray-800">21.8 <span class="text-base font-normal">Mbps</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabbed Interface -->
+            <div class="bg-white rounded-lg shadow-md">
+                <!-- Tab Headers -->
+                <div class="flex border-b border-gray-200">
+                    <button id="area1-tab" onclick="showTab('area1')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 1</button>
+                    <button id="area2-tab" onclick="showTab('area2')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 2</button>
+                    <button id="area3-tab" onclick="showTab('area3')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 3</button>
+                    <button id="area4-tab" onclick="showTab('area4')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 4</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="p-6">
+                    <!-- Area 1 Content -->
+                    <div id="area1-content" class="tab-pane">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 1 Analysis (2G & 3G)</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">Speech Traffic (2G vs 3G)</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area1-speech-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">3G Data Traffic & KPIs</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area1-3g-kpi-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Area 2 Content -->
+                    <div id="area2-content" class="tab-pane hidden">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 2 Analysis (3G & 4G)</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Data Traffic by Band</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area2-4g-traffic-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Avg. DL User Throughput</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area2-4g-throughput-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Area 3 Content -->
+                    <div id="area3-content" class="tab-pane hidden">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 3 Analysis (3G & 4G)</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Throughput (CA vs Non-CA)</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area3-4g-ca-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">3G KPIs (CFR & DCLR)</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area3-3g-kpi-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Area 4 Content -->
+                    <div id="area4-content" class="tab-pane hidden">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 4 Analysis (2G & 3G)</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">2G KPIs (CFR, DCLR, AFR)</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area4-2g-kpi-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-600">3G HSDPA User Throughput</h4>
+                                <div class="chart-panel">
+                                    <canvas id="area4-3g-throughput-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
-   
-        <!-- Global KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <!-- Card 1: Total Speech Traffic -->
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
-                <div class="p-3 bg-blue-100 rounded-full">
-                    <i data-lucide="phone" class="text-blue-600"></i>
-                </div>
-                <div>
-                    <span class="text-sm font-medium text-gray-500">Total Speech Traffic</span>
-                    <p class="text-2xl font-bold text-gray-800">451.2k <span class="text-base font-normal">Erlang</span></p>
-                </div>
-            </div>
-            <!-- Card 2: Total Data Traffic -->
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
-                <div class="p-3 bg-green-100 rounded-full">
-                    <i data-lucide="bar-chart-2" class="text-green-600"></i>
-                </div>
-                <div>
-                    <span class="text-sm font-medium text-gray-500">Total Data Traffic</span>
-                    <p class="text-2xl font-bold text-gray-800">8,204.5 <span class="text-base font-normal">TB</span></p>
-                </div>
-            </div>
-            <!-- Card 3: Avg DCR -->
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
-                <div class="p-3 bg-red-100 rounded-full">
-                    <i data-lucide="phone-off" class="text-red-600"></i>
-                </div>
-                <div>
-                    <span class="text-sm font-medium text-gray-500">Avg. Drop Call Rate (DCR)</span>
-                    <p class="text-2xl font-bold text-gray-800">0.42%</p>
-                </div>
-            </div>
-            <!-- Card 4: Avg 4G Throughput -->
-            <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
-                <div class="p-3 bg-purple-100 rounded-full">
-                    <i data-lucide="download" class="text-purple-600"></i>
-                </div>
-                <div>
-                    <span class="text-sm font-medium text-gray-500">Avg. 4G DL Throughput</span>
-                    <p class="text-2xl font-bold text-gray-800">21.8 <span class="text-base font-normal">Mbps</span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabbed Interface -->
-        <div class="bg-white rounded-lg shadow-md">
-            <!-- Tab Headers -->
-            <div class="flex border-b border-gray-200">
-                <button id="area1-tab" onclick="showTab('area1')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 1</button>
-                <button id="area2-tab" onclick="showTab('area2')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 2</button>
-                <button id="area3-tab" onclick="showTab('area3')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 3</button>
-                <button id="area4-tab" onclick="showTab('area4')" class="tab-inactive py-4 px-6 font-semibold cursor-pointer">Area 4</button>
-            </div>
-
-            <!-- Tab Content -->
-            <div class="p-6">
-                <!-- Area 1 Content -->
-                <div id="area1-content" class="tab-pane">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 1 Analysis (2G & 3G)</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">Speech Traffic (2G vs 3G)</h4>
-                            <div class="h-80">
-                                <canvas id="area1-speech-chart"></canvas>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">3G Data Traffic & KPIs</h4>
-                            <div class="h-80">
-                                <canvas id="area1-3g-kpi-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Area 2 Content -->
-                <div id="area2-content" class="tab-pane hidden">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 2 Analysis (3G & 4G)</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Data Traffic by Band</h4>
-                            <div class="h-80">
-                                <canvas id="area2-4g-traffic-chart"></canvas>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Avg. DL User Throughput</h4>
-                            <div class="h-80">
-                                <canvas id="area2-4g-throughput-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Area 3 Content -->
-                <div id="area3-content" class="tab-pane hidden">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 3 Analysis (3G & 4G)</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">4G Throughput (CA vs Non-CA)</h4>
-                            <div class="h-80">
-                                <canvas id="area3-4g-ca-chart"></canvas>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">3G KPIs (CFR & DCLR)</h4>
-                            <div class="h-80">
-                                <canvas id="area3-3g-kpi-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Area 4 Content -->
-                <div id="area4-content" class="tab-pane hidden">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Area 4 Analysis (2G & 3G)</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">2G KPIs (CFR, DCLR, AFR)</h4>
-                            <div class="h-80">
-                                <canvas id="area4-2g-kpi-chart"></canvas>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-lg font-semibold mb-3 text-gray-600">3G HSDPA User Throughput</h4>
-                            <div class="h-80">
-                                <canvas id="area4-3g-throughput-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
@@ -292,7 +323,7 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
-        
+
         function createArea3Charts() {
             // Area 3 - 4G CA/Non-CA
             const ctx1 = document.getElementById('area3-4g-ca-chart').getContext('2d');
@@ -349,7 +380,7 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'Rate (%)' } } } }
             });
         }
-        
+
         function createArea4Charts() {
             // Area 4 - 2G KPIs
             const ctx1 = document.getElementById('area4-2g-kpi-chart').getContext('2d');
@@ -404,7 +435,7 @@
 
         // --- Tab Switching Logic ---
         const tabPanes = document.querySelectorAll('.tab-pane');
-        const tabButtons = document.querySelectorAll('.tab-inactive');
+        const tabButtons = document.querySelectorAll('.tab-inactive, .tab-active');
 
         function showTab(tabId) {
             // Hide all panes
@@ -419,12 +450,54 @@
             });
 
             // Show selected pane
-            document.getElementById(tabId + '-content').classList.remove('hidden');
+            const paneEl = document.getElementById(tabId + '-content');
+            if (paneEl) paneEl.classList.remove('hidden');
 
             // Activate selected button
             const activeButton = document.getElementById(tabId + '-tab');
-            activeButton.classList.add('tab-active');
-            activeButton.classList.remove('tab-inactive');
+            if (activeButton) {
+                activeButton.classList.add('tab-active');
+                activeButton.classList.remove('tab-inactive');
+            }
+
+            // After changing visible content, refit to viewport (some charts might change height)
+            requestAnimationFrame(fitToViewport);
+        }
+
+        // --- Fit-to-viewport (auto-scale) ---
+        const pageEl = document.getElementById('page');
+
+        function fitToViewport() {
+            // Reset transform to measure natural height
+            pageEl.style.transform = 'none';
+            pageEl.style.width = ''; // restore natural width for measurement
+
+            // small delay to ensure DOM/CSS have applied
+            const naturalHeight = pageEl.getBoundingClientRect().height;
+            const viewportHeight = window.innerHeight;
+
+            // If natural height fits viewport, use scale 1
+            let scale = 1;
+            if (naturalHeight > viewportHeight) {
+                scale = viewportHeight / naturalHeight;
+                // clamp scale to sensible minimum to avoid extremely tiny renders
+                scale = Math.max(scale, 0.5);
+            }
+
+            pageEl.style.transformOrigin = 'top left';
+            pageEl.style.transform = 'scale(' + scale + ')';
+
+            // widen container to prevent horizontal clipping after scaling
+            pageEl.style.width = (100 / scale) + '%';
+        }
+
+        // debounce helper
+        function debounce(fn, wait = 120) {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), wait);
+            };
         }
 
         // --- Initialization ---
@@ -437,14 +510,21 @@
 
             // Show the first tab by default
             showTab('area1');
-            
+
             // Initialize Lucide icons
             lucide.createIcons();
+
+            // Fit page to viewport after charts and layout are ready
+            // Allow a tiny timeout to ensure chart canvas sizes have settled
+            setTimeout(() => {
+                fitToViewport();
+            }, 60);
         };
 
+        // Re-fit on resize
+        window.addEventListener('resize', debounce(() => {
+            fitToViewport();
+        }, 160));
     </script>
 </body>
 </html>
-
-
-
